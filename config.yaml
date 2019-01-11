@@ -1,0 +1,30 @@
+openhab: "http://192.168.0.1:8080/"
+timeout: 3
+devices:
+
+  Kitchen_Outlets:
+    type: OUTLET
+    name: Outlets
+    room: Kitchen
+    traits:
+      OnOff: Kitchen_Power
+
+  Livingroom_Light:
+    type: LIGHT
+    name: Light
+    room: Living Room
+    traits:
+      OnOff: Livingroom_Light_Power
+      Brightness: Livingroom_Light_Brightness
+
+  Bedroom_WallLamp:
+    type: LIGHT
+    name: Wall Lamp
+    room: Bedroom
+    traits:
+      OnOff: Bedroom_WallLamp_Power
+      Brightness: Bedroom_WallLamp_Bright
+      ColorTemperature: YeeBulb1_ColorTemp
+    attributes:
+      temperatureMinK: 2700
+      temperatureMaxK: 6500
