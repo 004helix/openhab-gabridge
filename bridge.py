@@ -137,7 +137,7 @@ class Bridge:
                     reply['color'] = dict()
 
                     if 'colorTemperatureRange' in attrs and item_state.isdigit():
-                        reply['color']['temperatureK'] = int(state)
+                        reply['color']['temperatureK'] = int(item_state)
 
                     elif 'colorModel' in attrs and attrs['colorModel'] == 'rgb' and item_type == 'Color':
                         state = item_state.split(',', 2)
