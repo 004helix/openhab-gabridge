@@ -143,9 +143,9 @@ class Bridge:
                         state = item_state.split(',', 2)
                         if len(state) == 3:
                             reply['color']['spectrumHsv'] = {
-                                'hue': int(state[0]),
-                                'saturation': int(state[1]) / 100,
-                                'value': int(state[2]) / 100,
+                                'hue': float(state[0]),
+                                'saturation': float(state[1]) / 100,
+                                'value': float(state[2]) / 100,
                             }
 
                     else:
@@ -192,9 +192,9 @@ class Bridge:
                 return states
 
             elif 'spectrumHSV' in params['color'] and 'colorModel' in attrs and attrs['colorModel'] == 'hsv':
-                h = int(float(params['color']['spectrumHSV']['hue']))
-                s = int(float(params['color']['spectrumHSV']['saturation']) * 100)
-                v = int(float(params['color']['spectrumHSV']['value']) * 100)
+                h = float(params['color']['spectrumHSV']['hue'])
+                s = float(params['color']['spectrumHSV']['saturation']) * 100
+                v = float(params['color']['spectrumHSV']['value']) * 100
                 self._exec(traits['ColorSetting'], '%d,%d,%d' % (h, s, v))
                 states['color'] = {
                     'spectrumHsv': {
