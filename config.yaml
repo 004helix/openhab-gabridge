@@ -30,7 +30,7 @@ devices:
         temperatureMinK: 2700
         temperatureMaxK: 6500
 
-  Livingroom_RGBLamp
+  Livingroom_RGBLamp:
     type: LIGHT
     name: Wall Lamp
     room: Livingroom
