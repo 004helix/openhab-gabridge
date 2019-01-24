@@ -195,7 +195,7 @@ class Bridge:
                 h = float(params['color']['spectrumHSV']['hue'])
                 s = float(params['color']['spectrumHSV']['saturation']) * 100
                 v = float(params['color']['spectrumHSV']['value']) * 100
-                self._exec(traits['ColorSetting'], '%d,%d,%d' % (h, s, v))
+                self._exec(traits['ColorSetting'], '{},{},{}'.format(h, s, v))
                 states['color'] = {
                     'spectrumHsv': {
                         'hue': h,
