@@ -139,12 +139,14 @@ class Bridge:
                     if 'colorTemperatureRange' in attrs and item_state.isdigit():
                         reply['color']['temperatureK'] = int(item_state)
 
-                    elif 'colorModel' in attrs and attrs['colorModel'] == 'rgb' and item_type == 'Color':
+                    elif 'colorModel' in attrs and attrs['colorModel'] == 'hsv' and item_type == 'Color':
                         state = item_state.split(',', 2)
                         if len(state) == 3:
-                            reply['color']['spectrumRgb'] = (int(state[0]) & 0xFF) << 16
-                            reply['color']['spectrumRgb'] += (int(state[1]) & 0xFF) << 8
-                            reply['color']['spectrumRgb'] += int(state[2]) & 0xFF
+                            reply['color']['spectrumHsv'] = {
+                                'hue': int(state[0]),
+                                'saturation': int(state[1]) / 100,
+                                'value': int(state[2]) / 100,
+                            }
 
                     else:
                         continue
@@ -189,11 +191,18 @@ class Bridge:
                 states['color'] = { 'temperatureK': value }
                 return states
 
-            elif 'spectrumRGB' in params['color'] and 'colorModel' in attrs and attrs['colorModel'] == 'rgb':
-                value = int(params['color']['spectrumRGB'])
-                value = '%d,%d,%d' % ((value & 0xFF0000) >> 16, (value & 0xFF00) >> 8, value & 0xFF)
-                self._exec(traits['ColorSetting'], value)
-                states['color'] = { 'spectrumRgb': params['color']['spectrumRGB'] }
+            elif 'spectrumHSV' in params['color'] and 'colorModel' in attrs and attrs['colorModel'] == 'hsv':
+                h = int(float(params['color']['spectrumHSV']['hue']))
+                s = int(float(params['color']['spectrumHSV']['saturation']) * 100)
+                v = int(float(params['color']['spectrumHSV']['value']) * 100)
+                self._exec(traits['ColorSetting'], '%d,%d,%d' % (h, s, v))
+                states['color'] = {
+                    'spectrumHsv': {
+                        'hue': h,
+                        'saturation': s / 100,
+                        'value': v / 100,
+                    }
+                }
                 return states
 
             else:

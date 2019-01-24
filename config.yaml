@@ -37,6 +37,6 @@ devices:
     traits:
       OnOff: LR_WallLamp_Power
       Brightness: LR_WallLamp_Brightness
-      ColorSetting: LR_WallLamp_ColorRGB
+      ColorSetting: LR_WallLamp_Color
     attributes:
-      colorModel: rgb
+      colorModel: hsv
