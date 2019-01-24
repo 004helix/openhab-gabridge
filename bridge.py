@@ -105,7 +105,7 @@ class Bridge:
 
             device = self.devices[devid]
 
-            d = {
+            reply = {
                 'online': True
             }
 
@@ -113,26 +113,43 @@ class Bridge:
                 if itemid not in items:
                     continue
 
-                if 'state' not in items[itemid]:
+                if 'type' not in items[itemid] or \
+                   'state' not in items[itemid]:
                     continue
 
-                state = items[itemid]['state']
+                item_type = items[itemid]['type']
+                item_state = items[itemid]['state']
 
                 if trait == 'OnOff':
-                    d['on'] = bool(state.lower() == 'on')
+                    reply['on'] = bool(item_state.lower() == 'on')
                     continue
 
-                if trait == 'Brightness' and state.isdigit():
-                    d['brightness'] = int(state) if int(state) > 0 else 1
+                if trait == 'Brightness' and item_state.isdigit():
+                    reply['brightness'] = int(item_state) if int(item_state) > 0 else 1
                     continue
 
-                if trait == 'ColorTemperature' and state.isdigit():
-                    if 'color' not in d:
-                        d['color'] = dict()
-                    d['color']['temperature'] = int(state)
-                    continue
+                if trait == 'ColorSetting':
+                    if 'attributes' not in device:
+                        continue
 
-            devices[devid] = d
+                    attrs = device['attributes']
+
+                    reply['color'] = dict()
+
+                    if 'colorTemperatureRange' in attrs and item_state.isdigit():
+                        reply['color']['temperatureK'] = int(state)
+
+                    elif 'colorModel' in attrs and attrs['colorModel'] == 'rgb' and item_type == 'Color':
+                        state = item_state.split(',', 2)
+                        if len(state) == 3:
+                            reply['color']['spectrumRgb'] = (int(state[0]) & 0xFF) << 16
+                            reply['color']['spectrumRgb'] += (int(state[1]) & 0xFF) << 8
+                            reply['color']['spectrumRgb'] += int(state[2]) & 0xFF
+
+                    else:
+                        continue
+
+            devices[devid] = reply
 
         return devices
 
@@ -160,15 +177,26 @@ class Bridge:
 
             return states
 
-        if command == 'action.devices.commands.ColorAbsolute':
-            if 'ColorTemperature' in traits and 'temperature' in params['color']:
-                value = str(params['color']['temperature'])
-                self._exec(traits['ColorTemperature'], value)
-                if 'color' in states:
-                    states['color']['temperature'] = value
-                else:
-                    states['color'] = { 'temperature': value }
+        if command == 'action.devices.commands.ColorAbsolute' and 'color' in params:
+            if 'attributes' in self.devices[devid]:
+                attrs = self.devices[devid]['attributes']
+            else:
+                raise Exception('Attributes not set for %s' % (devid,))
 
-            return states
+            if 'temperature' in params['color'] and 'colorTemperatureRange' in attrs:
+                value = str(params['color']['temperature'])
+                self._exec(traits['ColorSetting'], value)
+                states['color'] = { 'temperatureK': value }
+                return states
+
+            elif 'spectrumRGB' in params['color'] and 'colorModel' in attrs and attrs['colorModel'] == 'rgb':
+                value = int(params['color']['spectrumRGB'])
+                value = '%d,%d,%d' % ((value & 0xFF0000) >> 16, (value & 0xFF00) >> 8, value & 0xFF)
+                self._exec(traits['ColorSetting'], value)
+                states['color'] = { 'spectrumRgb': params['color']['spectrumRGB'] }
+                return states
+
+            else:
+                raise Exception('Unsupported color type')
 
         raise Exception('Unsupported command')

@@ -22,9 +22,21 @@ devices:
     name: Wall Lamp
     room: Bedroom
     traits:
-      OnOff: Bedroom_WallLamp_Power
-      Brightness: Bedroom_WallLamp_Bright
-      ColorTemperature: YeeBulb1_ColorTemp
+      OnOff: BR_WallLamp_Power
+      Brightness: BR_WallLamp_Brightness
+      ColorSetting: BR_WallLamp_ColorTemperature
     attributes:
-      temperatureMinK: 2700
-      temperatureMaxK: 6500
+      colorTemperatureRange:
+        temperatureMinK: 2700
+        temperatureMaxK: 6500
+
+  Livingroom_RGBLamp
+    type: LIGHT
+    name: Wall Lamp
+    room: Livingroom
+    traits:
+      OnOff: LR_WallLamp_Power
+      Brightness: LR_WallLamp_Brightness
+      ColorSetting: LR_WallLamp_ColorRGB
+    attributes:
+      colorModel: rgb
