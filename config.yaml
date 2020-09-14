@@ -100,3 +100,4 @@ devices:
                   - speed 4
                 lang: en
         ordered: true
+      reversible: false
