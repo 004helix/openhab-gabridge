@@ -52,8 +52,11 @@ class Bridge:
         self.devices = config['devices']
         self.timeout = config['timeout'] if 'timeout' in config else 5
 
-    def _items(self):
-        r = requests.get('{}/rest/items'.format(self.url), timeout=self.timeout)
+    def _items(self, item=None):
+        if item is None:
+            r = requests.get('{}/rest/items'.format(self.url), timeout=self.timeout)
+        else:
+            r = requests.get('{}/rest/items/{}'.format(self.url, item), timeout=self.timeout)
         r.raise_for_status()
         return r.json()
 
@@ -106,11 +109,13 @@ class Bridge:
             device = self.devices[devid]
 
             reply = {
-                'online': True
+                'online': True,
+                'statue': 'SUCCESS'
             }
 
+            # simple traits
             for trait, itemid in device['traits'].items():
-                if itemid not in items:
+                if not isinstance(itemid, str) or itemid not in items:
                     continue
 
                 if 'type' not in items[itemid] or \
@@ -150,6 +155,26 @@ class Bridge:
 
                     else:
                         continue
+
+                if trait == 'FanSpeed':
+                    reply['currentFanSpeedSetting'] = item_state
+                    continue
+
+            # TemperatureSetting trait
+            if 'TemperatureSetting' in device['traits'].items():
+                trait = device['traits']['TemperatureSetting']
+
+                if 'TempItem' in trait and trait['TempItem'] in items:
+                    reply['thermostatTemperatureSetpoint'] = float(items[trait['TempItem']]['state'])
+
+                if 'ModeItem' in trait and trait['ModeItem'] in items:
+                    mode = items[trait['ModeItem']]['state']
+                    if 'ModeMap' in trait:
+                        invmap = { v: k for k, v in trait['ModeMap'].items() }
+                        if mode in invmap:
+                            reply['thermostatMode'] = invmap[mode]
+                    else:
+                        reply['thermostatMode'] = mode
 
             devices[devid] = reply
 
@@ -207,5 +232,50 @@ class Bridge:
 
             else:
                 raise Exception('Unsupported color type')
+
+        if command == 'action.devices.commands.ThermostatSetMode':
+            if 'TemperatureSetting' in traits and 'ModeItem' in traits['TemperatureSetting']:
+                modeitem = traits['TemperatureSetting']['ModeItem']
+                mode = params['thermostatMode']
+                if 'ModeMap' in traits['TemperatureSetting'] and mode in traits['TemperatureSetting']['ModeMap']:
+                    self._exec(modeitem, traits['TemperatureSetting']['ModeMap'][mode])
+                else:
+                    self._exec(modeitem, mode)
+
+                states['thermostatMode'] = mode
+
+                if 'TempItem' in traits['TemperatureSetting']:
+                    tempitem = self._items(traits['TemperatureSetting']['TempItem'])
+                    states['thermostatTemperatureSetpoint'] = float(tempitem['state'])
+
+            return states
+
+        if command == 'action.devices.commands.ThermostatTemperatureSetpoint':
+            if 'TemperatureSetting' in traits and 'TempItem' in traits['TemperatureSetting']:
+                tempitem = traits['TemperatureSetting']['TempItem']
+                temp = int(float(params['thermostatTemperatureSetpoint']))
+                self._exec(tempmode, str(temp))
+
+                states['thermostatTemperatureSetpoint'] = temp
+
+                if 'ModeItem' in traits['TemperatureSetting']:
+                    modeitem = self._items(traits['TemperatureSetting']['ModeItem'])
+                    mode = modeitem['state']
+
+                    if 'ModeMap' in traits['TemperatureSetting']:
+                        invmap = { v: k for k, v in traits['TemperatureSetting']['ModeMap'].items() }
+                        if mode in invmap:
+                            states['thermostatMode'] = invmap[mode]
+                    else:
+                        states['thermostatMode'] = mode
+
+            return states
+
+        if command == 'action.devices.commands.SetFanSpeed':
+            if 'FanSpeed' in traits and 'fanSpeed' in params:
+                self._exec(traits['FanSpeed'], params['fanSpeed'])
+                states['currentFanSpeedSetting'] = params['fanSpeed']
+
+            return states
 
         raise Exception('Unsupported command')

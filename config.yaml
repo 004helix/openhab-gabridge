@@ -40,3 +40,63 @@ devices:
       ColorSetting: LR_WallLamp_Color
     attributes:
       colorModel: hsv
+
+  Livingroom_AC:
+    type: AC_UNIT
+    name: Air conditioning unit
+    room: Livingroom
+    traits:
+      OnOff: AC_Power
+      TemperatureSetting:
+        TempItem: AC_Temp
+        ModeItem: AC_Mode
+        ModeMap:
+          auto: AUTO
+          heat: HEAR
+          cool: COOL
+          fan-only: FAN
+          dry: DRY
+      FanSpeeds: AC_Fan
+    attributes:
+      availableThermostatModes: auto,heat,cool,fan-only,dry
+      thermostatTemperatureUnit: C
+      thermostatTemperatureRange:
+        minThresholdCelsius: 16
+        maxThresholdCelsius: 32
+      availableFanSpeeds:
+        speeds:
+          - speed_name: AUTO
+            speed_values:
+              - speed_synonym:
+                  - auto
+                  - speed 0
+                lang: en
+          - speed_name: LOW
+            speed_values:
+              - speed_synonym:
+                  - low
+                  - min
+                  - minimum
+                  - speed 1
+                lang: en
+          - speed_name: MED
+            speed_values:
+              - speed_synonym:
+                  - med
+                  - medium
+                  - speed 2
+                lang: en
+          - speed_name: HIGH
+            speed_values:
+              - speed_synonym:
+                  - high
+                  - speed 3
+                lang: en
+          - speed_name: MAX
+            speed_values:
+              - speed_synonym:
+                  - max
+                  - maximum
+                  - speed 4
+                lang: en
+        ordered: true
