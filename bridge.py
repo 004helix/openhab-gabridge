@@ -161,7 +161,7 @@ class Bridge:
                     continue
 
             # TemperatureSetting trait
-            if 'TemperatureSetting' in device['traits'].items():
+            if 'TemperatureSetting' in device['traits']:
                 trait = device['traits']['TemperatureSetting']
 
                 if 'TempItem' in trait and trait['TempItem'] in items:
