@@ -56,7 +56,7 @@ devices:
           cool: COOL
           fan-only: FAN
           dry: DRY
-      FanSpeeds: AC_Fan
+      FanSpeed: AC_Fan
     attributes:
       availableThermostatModes: auto,heat,cool,fan-only,dry
       thermostatTemperatureUnit: C
