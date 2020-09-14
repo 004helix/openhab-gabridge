@@ -254,7 +254,7 @@ class Bridge:
             if 'TemperatureSetting' in traits and 'TempItem' in traits['TemperatureSetting']:
                 tempitem = traits['TemperatureSetting']['TempItem']
                 temp = int(float(params['thermostatTemperatureSetpoint']))
-                self._exec(tempmode, str(temp))
+                self._exec(tempitem, str(temp))
 
                 states['thermostatTemperatureSetpoint'] = temp
 
