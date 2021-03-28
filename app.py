@@ -89,7 +89,7 @@ def devices():
     print('  <<<', json.dumps(req))
 
     if intent is None:
-        reply = { 'requestId': req_id }
+        reply = {'requestId': req_id}
         print('>>>', json.dumps(reply))
         return flask.jsonify(reply)
 

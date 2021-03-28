@@ -54,14 +54,27 @@ class Bridge:
 
     def _items(self, item=None):
         if item is None:
-            r = requests.get('{}/rest/items'.format(self.url), timeout=self.timeout)
+            r = requests.get(
+                '{}/rest/items'.format(self.url),
+                headers={'Accept': 'application/json'},
+                timeout=self.timeout
+            )
         else:
-            r = requests.get('{}/rest/items/{}'.format(self.url, item), timeout=self.timeout)
+            r = requests.get(
+                '{}/rest/items/{}'.format(self.url, item),
+                headers={'Accept': 'application/json'},
+                timeout=self.timeout
+            )
         r.raise_for_status()
         return r.json()
 
     def _exec(self, item, state):
-        r = requests.post('{}/rest/items/{}'.format(self.url, item), data=state, timeout=self.timeout)
+        r = requests.post(
+            '{}/rest/items/{}'.format(self.url, item),
+            headers={'Content-type': 'text/plain', 'Accept': 'application/json'},
+            timeout=self.timeout,
+            data=state
+        )
         r.raise_for_status()
 
     def sync(self):
@@ -71,7 +84,7 @@ class Bridge:
             d = {
                 'id': devid,
                 'type': 'action.devices.types.{}'.format(device['type']),
-                'name': { 'name': device['name'] },
+                'name': {'name': device['name']},
                 'traits': [],
                 'willReportState': False,
                 'deviceInfo': {
@@ -170,7 +183,7 @@ class Bridge:
                 if 'ModeItem' in trait and trait['ModeItem'] in items:
                     mode = items[trait['ModeItem']]['state']
                     if 'ModeMap' in trait:
-                        invmap = { v: k for k, v in trait['ModeMap'].items() }
+                        invmap = {v: k for k, v in trait['ModeMap'].items()}
                         if mode in invmap:
                             reply['thermostatMode'] = invmap[mode]
                     else:
@@ -181,7 +194,7 @@ class Bridge:
         return devices
 
     def execute(self, devid, command, params):
-        states = { 'online': True }
+        states = {'online': True}
 
         if devid not in self.devices:
             return states
@@ -213,7 +226,7 @@ class Bridge:
             if 'temperature' in params['color'] and 'colorTemperatureRange' in attrs:
                 value = str(params['color']['temperature'])
                 self._exec(traits['ColorSetting'], value)
-                states['color'] = { 'temperatureK': value }
+                states['color'] = {'temperatureK': value}
                 return states
 
             elif 'spectrumHSV' in params['color'] and 'colorModel' in attrs and attrs['colorModel'] == 'hsv':
@@ -263,7 +276,7 @@ class Bridge:
                     mode = modeitem['state']
 
                     if 'ModeMap' in traits['TemperatureSetting']:
-                        invmap = { v: k for k, v in traits['TemperatureSetting']['ModeMap'].items() }
+                        invmap = {v: k for k, v in traits['TemperatureSetting']['ModeMap'].items()}
                         if mode in invmap:
                             states['thermostatMode'] = invmap[mode]
                     else:
