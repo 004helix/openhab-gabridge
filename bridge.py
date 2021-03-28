@@ -43,7 +43,7 @@ class Bridge:
         else:
             data['path'] = path
             with open(path, 'r') as f:
-                config = yaml.load(f)
+                config = yaml.safe_load(f)
                 data['mtime'] = os.fstat(f.fileno()).st_mtime
             data['config'] = config
             save(data)
